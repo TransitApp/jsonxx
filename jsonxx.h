@@ -5,7 +5,8 @@
 //   Sean Middleditch <sean@middleditch.us>
 //   rlyeh <https://github.com/r-lyeh>
 
-#pragma once
+#ifndef JSONXX_DEFINE_H
+#define JSONXX_DEFINE_H
 
 #include <cassert>
 #include <iostream>
@@ -504,3 +505,5 @@ number_value_ = static_cast<long double>(n); \
 std::ostream& operator<<(std::ostream& stream, const jsonxx::Value& v);
 std::ostream& operator<<(std::ostream& stream, const jsonxx::Object& v);
 std::ostream& operator<<(std::ostream& stream, const jsonxx::Array& v);
+
+#endif
