@@ -33,12 +33,8 @@
 #define JSONXX_COMPILER_HAS_CXX11 0
 #endif
 
-#if DEBUG
 #define JSONXX_ASSERT(...) do { if( jsonxx::Assertions ) \
   jsonxx::assertion(__FILE__,__LINE__,#__VA_ARGS__,bool(__VA_ARGS__)); } while(0)
-#else
-#define JSONXX_ASSERT //
-#endif
 
 namespace jsonxx {
     
@@ -52,7 +48,11 @@ namespace jsonxx {
         // values
         Parser = Permissive,  // permissive or strict parsing
         UnquotedKeys = Disabled, // support of unquoted keys
+#if DEBUG
         Assertions = Enabled  // enabled or disabled assertions (these asserts work both in DEBUG and RELEASE builds)
+#else
+        Assertions = Disabled  // enabled or disabled assertions (these asserts work both in DEBUG and RELEASE builds)
+#endif
     };
     
     // Constants for .write() and .xml() methods
