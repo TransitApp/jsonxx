@@ -93,7 +93,7 @@ int main(int argc, const char **argv) {
     }
     {
         // 'escaped text to unescaped text' test
-        string teststr("\"\\b\\f\\n\\r\\t\\u0014\\u0002\"");
+        string teststr("\"\\b\\f\\n\\r\\t\\u000e\\u0002\"");
         string value;
         istringstream input(teststr);
         TEST(parse_string(input, value));
@@ -560,7 +560,7 @@ int main(int argc, const char **argv) {
         o << "number" << 123;
         o << "string" << "hello world";
         o << "boolean" << false;
-        o << "null" << NULL;
+        o << "null" << static_cast<void*>(0);
         o << "array" << a;
         o << "object" << jsonxx::Object("child", "object");
         o << "undefined" << custom_type();

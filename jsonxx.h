@@ -8,6 +8,7 @@
 #ifndef JSONXX_DEFINE_H
 #define JSONXX_DEFINE_H
 
+#include <cstddef>
 #include <cassert>
 #include <iostream>
 #include <map>
