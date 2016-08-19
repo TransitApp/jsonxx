@@ -514,8 +514,9 @@ typedef unsigned char byte;
 
 //template<bool quote>
 std::string escape_string( const std::string &input, const bool quote = false ) {
-    static std::string map[256], *once = 0;
-    if( !once ) {
+    static std::string map[256];
+    static std::once_flag once;
+    std::call_once(once, []{
         // base
         for( int i = 0; i < 256; ++i ) {
             map[ i ] = std::string() + char(i);
@@ -535,9 +536,8 @@ std::string escape_string( const std::string &input, const bool quote = false ) 
         map[ byte('\n') ] = "\\n";
         map[ byte('\r') ] = "\\r";
         map[ byte('\t') ] = "\\t";
-
-        once = map;
-    }
+    });
+    
     std::string output;
     output.reserve( input.size() * 2 + 2 ); // worst scenario
     if( quote ) output += '"';
@@ -609,8 +609,9 @@ namespace json {
 namespace xml {
 
 std::string escape_attrib( const std::string &input ) {
-    static std::string map[256], *once = 0;
-    if( !once ) {
+    static std::string map[256];
+    static std::once_flag once;
+    std::call_once(once, [] {
         for( int i = 0; i < 256; ++i )
             map[ i ] = "_";
         for( int i = int('a'); i <= int('z'); ++i )
@@ -619,8 +620,8 @@ std::string escape_attrib( const std::string &input ) {
             map[ i ] = std::string() + char(i);
         for( int i = int('0'); i <= int('9'); ++i )
             map[ i ] = std::string() + char(i);
-        once = map;
-    }
+    });
+    
     std::string output;
     output.reserve( input.size() ); // worst scenario
     for( std::string::const_iterator it = input.begin(), end = input.end(); it != end; ++it )
@@ -629,18 +630,19 @@ std::string escape_attrib( const std::string &input ) {
 }
 
 std::string escape_tag( const std::string &input, unsigned format ) {
-    static std::string map[256], *once = 0;
-    if( !once ) {
+    static std::string map[256];
+    static std::once_flag once;
+    std::call_once(once, [=] {
         for( int i = 0; i < 256; ++i )
             map[ i ] = std::string() + char(i);
         map[ byte('<') ] = "&lt;";
         map[ byte('>') ] = "&gt;";
-
+        
         switch( format )
         {
             default:
                 break;
-
+                
             case jsonxx::JXML:
             case jsonxx::JXMLex:
             case jsonxx::JSONx:
@@ -648,9 +650,8 @@ std::string escape_tag( const std::string &input, unsigned format ) {
                 map[ byte('&') ] = "&amp;";
                 break;
         }
+    });
 
-        once = map;
-    }
     std::string output;
     output.reserve( input.size() * 5 ); // worst scenario
     for( std::string::const_iterator it = input.begin(), end = input.end(); it != end; ++it )
