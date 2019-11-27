@@ -14,6 +14,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <string_view>
 #include <sstream>
 
 // jsonxx versioning: major.minor-extra where
@@ -193,14 +194,17 @@ namespace jsonxx {
         Value();
         ~Value() { reset(); }
         void reset();
-        
+
         template<typename T>
-        void import( const T & ) {
+        [[deprecated("this type is not natively supported by jsonxx, therefore its value will be converted to 'null'")]]
+        void import( const T& t ) {
             reset();
             type_ = INVALID_;
-            // debug
-            // std::cout << "[WARN] No support for " << typeid(t).name() << std::endl;
+#ifdef DEBUG
+            std::cerr << "[WARN] No JSONXX support for " << typeid(t).name() << std::endl;
+#endif
         }
+
         void import( const bool &b ) {
             reset();
             type_ = BOOL_;
@@ -238,6 +242,11 @@ number_value_ = static_cast<long double>(n); \
             reset();
             type_ = STRING_;
             *( string_value_ = new String() ) = s;
+        }
+        void import( const std::string_view &sv ) {
+            reset();
+            type_ = STRING_;
+            *( string_value_ = new String() ) = sv;
         }
         void import( const Array &a ) {
             reset();
