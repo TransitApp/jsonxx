@@ -248,6 +248,14 @@ number_value_ = static_cast<long double>(n); \
             type_ = STRING_;
             *( string_value_ = new String() ) = sv;
         }
+        template<typename T>
+        void import( const std::vector<T> &array ) {
+            Array a;
+            for (const auto& elmt : array) {
+                a << elmt;
+            }
+            import(a);
+        }
         void import( const Array &a ) {
             reset();
             type_ = ARRAY_;
