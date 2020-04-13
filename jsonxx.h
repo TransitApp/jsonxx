@@ -195,16 +195,6 @@ namespace jsonxx {
         ~Value() { reset(); }
         void reset();
 
-        template<typename T>
-        [[deprecated("this type is not natively supported by jsonxx, therefore its value will be converted to 'null'")]]
-        void import( const T& t ) {
-            reset();
-            type_ = INVALID_;
-#ifdef DEBUG
-            std::cerr << "[WARN] No JSONXX support for " << typeid(t).name() << std::endl;
-#endif
-        }
-
         void import( const bool &b ) {
             reset();
             type_ = BOOL_;
