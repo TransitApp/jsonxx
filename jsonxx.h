@@ -505,7 +505,8 @@ number_value_ = static_cast<long double>(n); \
     
     template<typename T>
     inline Object &Object::operator<<(const T &value) {
-        return *this << Value(value), *this;
+        *this << Value(value);
+        return *this;
     }
     
 }  // namespace jsonxx
