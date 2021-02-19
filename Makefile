@@ -1,10 +1,11 @@
-CXXFLAGS=-Werror -Wall -g
-
-jsonxx_test: jsonxx_test.cc jsonxx.o
+CXXFLAGS=-std=c++11 -Werror -Wall -g -DDEBUG
 
 jsonxx.o: jsonxx.h jsonxx.cc
 
-test: jsonxx_test
+jsonxx_test: CXXFLAGS+=-Wno-error=deprecated-declarations
+jsonxx_test: jsonxx_test.cc jsonxx.o
+
+test: jsonxx.o jsonxx_test
 	./jsonxx_test
 
 .PHONY: clean
