@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 
+#define JSONXX_ALLOW_INVALID_TYPES
 #include "jsonxx.h"
 
 namespace jsonxx {
@@ -560,7 +561,7 @@ int main(int argc, const char **argv) {
         o << "number" << 123;
         o << "string" << "hello world";
         o << "boolean" << false;
-        o << "null" << static_cast<void*>(0);
+        o << "null" << nullptr;
         o << "array" << a;
         o << "object" << jsonxx::Object("child", "object");
         o << "undefined" << custom_type();
