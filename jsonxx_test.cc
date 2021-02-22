@@ -10,6 +10,7 @@
 #include <iostream>
 #include <fstream>
 
+#define JSONXX_ALLOW_INVALID_TYPES
 #include "jsonxx.h"
 
 namespace jsonxx {
