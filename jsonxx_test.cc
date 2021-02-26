@@ -641,13 +641,9 @@ int main(int argc, const char **argv) {
         jsonxx::Object o;
         TEST( o.parse(teststr) );
 
-        auto value = o.get<jsonxx::Number>("pos");
+        auto value = o.get<jsonxx::Number>("finite");
         TEST( value > 0 );
-        TEST( isinf(value) );
-
-        value = o.get<jsonxx::Number>("neg");
-        TEST( value < 0 );
-        TEST( isinf(value) );
+        TEST( isfinite(value) );
 
         value = o.get<jsonxx::Number>("pos_overflow");
         TEST( value > 0 );
@@ -657,9 +653,15 @@ int main(int argc, const char **argv) {
         TEST( value < 0 );
         TEST( isinf(value) );
 
-        value = o.get<jsonxx::Number>("finite");
+#if !JSONXX_FORBID_INFINITY
+        value = o.get<jsonxx::Number>("pos");
         TEST( value > 0 );
-        TEST( isfinite(value) );
+        TEST( isinf(value) );
+
+        value = o.get<jsonxx::Number>("neg");
+        TEST( value < 0 );
+        TEST( isinf(value) );
+#endif
     }
 
     {

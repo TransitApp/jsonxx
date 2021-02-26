@@ -192,19 +192,21 @@ bool parse_number(std::istream& input, Number& value) {
         if (parse_number_inf(input, value, rollback)) {
             return true;
         }
+
         input.clear();
         input.seekg(rollback);
         return false;
     }
-    else {
-        if (value >= MaxNumberRange) {
-            value = std::numeric_limits<Number>::infinity();
-        }
-        else if (value <= MinNumberRange) {
-            value = -std::numeric_limits<Number>::infinity();
-        }
-        return true;
+
+#if !JSONXX_FORBID_INFINITY
+    if (value >= MaxNumberRange) {
+        value = std::numeric_limits<Number>::infinity();
     }
+    else if (value <= MinNumberRange) {
+        value = -std::numeric_limits<Number>::infinity();
+    }
+#endif
+    return true;
 }
 
 bool parse_number_inf(std::istream& input, Number& value, std::streampos rollback) {
@@ -229,11 +231,11 @@ bool parse_number_inf(std::istream& input, Number& value, std::streampos rollbac
     do {
         ch = input.get();
     } while (isdigit(ch));
-    
+
     if (ch != 'E' && ch != 'e') {
         return false;
     }
-    
+
     int exponent;
     input >> exponent;
     return !input.fail();
