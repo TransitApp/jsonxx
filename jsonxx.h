@@ -39,6 +39,10 @@
 #define JSONXX_ASSERT(...) do { if( jsonxx::Assertions ) \
   jsonxx::assertion(__FILE__,__LINE__,#__VA_ARGS__,bool(__VA_ARGS__)); } while(0)
 
+#ifndef JSONXX_HANDLE_INFINITY
+#define JSONXX_HANDLE_INFINITY 1
+#endif
+
 #ifdef DEBUG
 #define JSONXX_WARN(...) \
   std::cerr << "[WARN] " << __VA_ARGS__ << std::endl;

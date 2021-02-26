@@ -198,7 +198,7 @@ bool parse_number(std::istream& input, Number& value) {
         return false;
     }
 
-#if !JSONXX_FORBID_INFINITY
+#if JSONXX_HANDLE_INFINITY
     if (value >= MaxNumberRange) {
         value = std::numeric_limits<Number>::infinity();
     }
@@ -651,7 +651,7 @@ namespace json {
                     ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
                     ss << t.number_value_;
                 }
-#if !JSONXX_FORBID_INFINITY
+#if JSONXX_HANDLE_INFINITY
                 else if (t.number_value_ > MaxNumberRange) {
                     ss << InfinityRepresentation;
                 }

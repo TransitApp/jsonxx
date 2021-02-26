@@ -653,7 +653,7 @@ int main(int argc, const char **argv) {
         TEST( value < 0 );
         TEST( isinf(value) );
 
-#if !JSONXX_FORBID_INFINITY
+#if JSONXX_HANDLE_INFINITY
         value = o.get<jsonxx::Number>("pos");
         TEST( value > 0 );
         TEST( isinf(value) );
@@ -666,10 +666,10 @@ int main(int argc, const char **argv) {
 
     {
         // infinity serialization test
-#if JSONXX_FORBID_INFINITY
-        string expected(R"( { "neg": null, "pos": null } )");
-#else
+#if JSONXX_HANDLE_INFINITY
         string expected(R"( { "neg": -1e500, "pos": 1e500 } )");
+#else
+        string expected(R"( { "neg": null, "pos": null } )");
 #endif
 
         jsonxx::Object o;
