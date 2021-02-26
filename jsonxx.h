@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cassert>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <vector>
 #include <string>
@@ -37,6 +38,17 @@
 
 #define JSONXX_ASSERT(...) do { if( jsonxx::Assertions ) \
   jsonxx::assertion(__FILE__,__LINE__,#__VA_ARGS__,bool(__VA_ARGS__)); } while(0)
+
+#ifndef JSONXX_HANDLE_INFINITY
+#define JSONXX_HANDLE_INFINITY 1
+#endif
+
+#ifdef DEBUG
+#define JSONXX_WARN(...) \
+  std::cerr << "[WARN] " << __VA_ARGS__ << std::endl;
+#else
+#define JSONXX_WARN(...) ;
+#endif
 
 namespace jsonxx {
     
@@ -74,6 +86,13 @@ namespace jsonxx {
     class Value;
     class Object;
     class Array;
+    
+    // Range of Number. Valid numbers outside the range as considered infinite
+    constexpr Number MaxNumberRange = std::numeric_limits<double>::max();
+    constexpr Number MinNumberRange = -std::numeric_limits<double>::max();
+    
+    // JSON representation of infinite numbers
+    constexpr const char* InfinityRepresentation = "1e500";
     
     // Identity meta-function
     template <typename T>
@@ -201,9 +220,7 @@ namespace jsonxx {
         void import( const T& t ) {
             reset();
             type_ = INVALID_;
-#ifdef DEBUG
-            std::cerr << "[WARN] No JSONXX support for " << typeid(t).name() << std::endl;
-#endif
+            JSONXX_WARN( "No JSONXX support for " << typeid(t).name() );
         }
 #else
         template<typename T> void import( const T& t ) = delete;

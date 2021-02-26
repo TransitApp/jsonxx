@@ -14,6 +14,7 @@
 #include <vector>
 #include <limits>
 #include <mutex>
+#include <math.h>
 
 // Snippet that creates an assertion function that works both in DEBUG & RELEASE mode.
 // JSONXX_ASSERT(...) macro will redirect to this. assert() macro is kept untouched.
@@ -46,6 +47,7 @@ bool parse_bool(std::istream& input, Boolean& value);
 bool parse_comment(std::istream &input);
 bool parse_null(std::istream& input);
 bool parse_number(std::istream& input, Number& value);
+bool parse_number_inf(std::istream& input, Number& value, std::streampos rollback);
 bool parse_object(std::istream& input, Object& object);
 bool parse_string(std::istream& input, String& value);
 bool parse_identifier(std::istream& input, String& value);
@@ -187,11 +189,56 @@ bool parse_number(std::istream& input, Number& value) {
     std::streampos rollback = input.tellg();
     input >> value;
     if (input.fail()) {
+        if (parse_number_inf(input, value, rollback)) {
+            return true;
+        }
+
         input.clear();
         input.seekg(rollback);
         return false;
     }
+
+#if JSONXX_HANDLE_INFINITY
+    if (value >= MaxNumberRange) {
+        value = std::numeric_limits<Number>::infinity();
+    }
+    else if (value <= MinNumberRange) {
+        value = -std::numeric_limits<Number>::infinity();
+    }
+#endif
     return true;
+}
+
+bool parse_number_inf(std::istream& input, Number& value, std::streampos rollback) {
+    input.clear();
+    input.seekg(rollback);
+
+    switch (input.peek()) {
+        case '-':
+            input.get();
+            value = -std::numeric_limits<Number>::infinity();
+            break;
+        case '+':
+        case '0'...'9':
+            input.get();
+            value = std::numeric_limits<Number>::infinity();
+            break;
+        default:
+            return false;
+    }
+
+    int ch;
+    do {
+        ch = input.get();
+    } while (isdigit(ch));
+
+    if (ch != 'E' && ch != 'e') {
+        return false;
+    }
+
+    int exponent;
+    input >> exponent;
+    return !input.fail();
 }
 
 bool parse_bool(std::istream& input, Boolean& value) {
@@ -599,9 +646,23 @@ namespace json {
                 return remove_last_comma( ss.str() ) + tab + "}" ",\n";
 
             case jsonxx::Value::NUMBER_:
-                // max precision
-                ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
-                ss << t.number_value_;
+                if (isfinite(t.number_value_)) {
+                    // max precision
+                    ss << std::setprecision(std::numeric_limits<long double>::digits10 + 1);
+                    ss << t.number_value_;
+                }
+#if JSONXX_HANDLE_INFINITY
+                else if (t.number_value_ > MaxNumberRange) {
+                    ss << InfinityRepresentation;
+                }
+                else if (t.number_value_ < MinNumberRange) {
+                    ss << '-' << InfinityRepresentation;
+                }
+#endif
+                else {
+                    JSONXX_WARN( "No JSONXX support for number value " << t.number_value_ );
+                    ss << "null"; // NaN or other stuff we cannot represent
+                }
                 return ss.str() + ",\n";
         }
     }
