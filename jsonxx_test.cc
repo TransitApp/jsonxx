@@ -25,6 +25,17 @@ bool is_asserting() {
     return asserting;
 }
 
+std::string remove_whitespace(const std::string& str) {
+    std::string result;
+    result.reserve(str.size());
+    for (auto ch : str) {
+        if (!isspace(ch)) {
+            result += ch;
+        }
+    }
+    return result;
+}
+
 struct custom_type {};      // Used in a test elsewhere
 
 int main(int argc, const char **argv) {
@@ -622,6 +633,48 @@ int main(int argc, const char **argv) {
         } else {
             cout << "Cant find '" << argv[1] << "'" << endl;
         }
+    }
+
+    {
+        // infinity parsing test
+        string teststr(R"( { "pos": 1e500, "neg": -1e500, "pos_overflow": 1e+5000, "neg_overflow": -1e+5000, "finite": 1e308 } )");
+        jsonxx::Object o;
+        TEST( o.parse(teststr) );
+
+        auto value = o.get<jsonxx::Number>("pos");
+        TEST( value > 0 );
+        TEST( isinf(value) );
+
+        value = o.get<jsonxx::Number>("neg");
+        TEST( value < 0 );
+        TEST( isinf(value) );
+
+        value = o.get<jsonxx::Number>("pos_overflow");
+        TEST( value > 0 );
+        TEST( isinf(value) );
+
+        value = o.get<jsonxx::Number>("neg_overflow");
+        TEST( value < 0 );
+        TEST( isinf(value) );
+
+        value = o.get<jsonxx::Number>("finite");
+        TEST( value > 0 );
+        TEST( isfinite(value) );
+    }
+
+    {
+        // infinity serialization test
+#if JSONXX_FORBID_INFINITY
+        string expected(R"( { "neg": null, "pos": null } )");
+#else
+        string expected(R"( { "neg": -1e500, "pos": 1e500 } )");
+#endif
+
+        jsonxx::Object o;
+        o << "pos" << numeric_limits<float>::infinity();
+        o << "neg" << -numeric_limits<float>::infinity();
+
+        TEST( remove_whitespace(o.json()) == remove_whitespace(expected) );
     }
 
     cout << "All tests ok." << endl;
