@@ -601,15 +601,28 @@ namespace json {
     std::string remove_last_comma( const std::string &_input ) {
         std::string input( _input );
         size_t size = input.size();
-        if( size > 2 )
+        if( size > 2 ) {
             if( input[ size - 2 ] == ',' )
                 input[ size - 2 ] = ' ';
+            if( input[ size - 1 ] == ',' )
+                input[ size - 1 ] = ' ';
+        }
         return input;
     }
 
-    std::string tag( unsigned format, unsigned depth, const std::string &name, const jsonxx::Value &t) {
+    std::string tag( unsigned format, unsigned depth, const std::string &name, const jsonxx::Value &t, PrintMode printMode) {
         std::stringstream ss;
-        const std::string tab(depth, '\t');
+        std::string tab(depth, '\t');
+        std::string newLine("\n");
+
+        switch (printMode) {
+            case Compact:
+                tab = "";
+                newLine = "";
+                break;
+            case Pretty:
+                break;
+        }
 
         if( !name.empty() )
             ss << tab << '\"' << escape_string( name ) << '\"' << ':' << ' ';
@@ -621,29 +634,29 @@ namespace json {
             default:
             case jsonxx::Value::NULL_:
                 ss << "null";
-                return ss.str() + ",\n";
+                return ss.str() + "," + newLine;
 
             case jsonxx::Value::BOOL_:
                 ss << ( t.bool_value_ ? "true" : "false" );
-                return ss.str() + ",\n";
+                return ss.str() + "," + newLine;
 
             case jsonxx::Value::ARRAY_:
-                ss << "[\n";
+                ss << "[" + newLine;
                 for(Array::container::const_iterator it = t.array_value_->values().begin(),
                     end = t.array_value_->values().end(); it != end; ++it )
-                  ss << tag( format, depth+1, std::string(), **it );
-                return remove_last_comma( ss.str() ) + tab + "]" ",\n";
+                  ss << tag( format, depth+1, std::string(), **it, printMode );
+                return remove_last_comma( ss.str() ) + tab + "]" "," + newLine;
 
             case jsonxx::Value::STRING_:
                 ss << '\"' << escape_string( *t.string_value_ ) << '\"';
-                return ss.str() + ",\n";
+                return ss.str() + "," + newLine;
 
             case jsonxx::Value::OBJECT_:
-                ss << "{\n";
+                ss << "{" + newLine;
                 for(Object::container::const_iterator it=t.object_value_->kv_map().begin(),
                     end = t.object_value_->kv_map().end(); it != end ; ++it)
-                  ss << tag( format, depth+1, it->first, *it->second );
-                return remove_last_comma( ss.str() ) + tab + "}" ",\n";
+                  ss << tag( format, depth+1, it->first, *it->second, printMode );
+                return remove_last_comma( ss.str() ) + tab + "}" "," + newLine;
 
             case jsonxx::Value::NUMBER_:
                 if (isfinite(t.number_value_)) {
@@ -663,7 +676,7 @@ namespace json {
                     JSONXX_WARN( "No JSONXX support for number value " << t.number_value_ );
                     ss << "null"; // NaN or other stuff we cannot represent
                 }
-                return ss.str() + ",\n";
+                return ss.str() + "," + newLine;
         }
     }
 } // namespace jsonxx::anon::json
@@ -894,14 +907,14 @@ const char *defrootattrib[] = {
 
 } // namespace jsonxx::anon
 
-std::string Object::json() const {
+std::string Object::json(PrintMode printMode) const {
     using namespace json;
 
     jsonxx::Value v;
     v.object_value_ = const_cast<jsonxx::Object*>(this);
     v.type_ = jsonxx::Value::OBJECT_;
 
-    std::string result = tag( jsonxx::JSON, 0, std::string(), v );
+    std::string result = tag( jsonxx::JSON, 0, std::string(), v, printMode );
 
     v.object_value_ = 0;
     return remove_last_comma( result );
@@ -921,14 +934,14 @@ std::string Object::xml( unsigned format, const std::string &header, const std::
     return ( header.empty() ? std::string(defheader[format]) : header ) + result;
 }
 
-std::string Array::json() const {
+std::string Array::json(PrintMode printMode) const {
     using namespace json;
 
     jsonxx::Value v;
     v.array_value_ = const_cast<jsonxx::Array*>(this);
     v.type_ = jsonxx::Value::ARRAY_;
 
-    std::string result = tag( jsonxx::JSON, 0, std::string(), v );
+    std::string result = tag( jsonxx::JSON, 0, std::string(), v, printMode );
 
     v.array_value_ = 0;
     return remove_last_comma( result );
