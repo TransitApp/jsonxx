@@ -51,6 +51,11 @@
 #endif
 
 namespace jsonxx {
+
+    enum PrintMode {
+        Pretty,
+        Compact,
+    };
     
     // Settings
     enum Settings {
@@ -134,7 +139,7 @@ namespace jsonxx {
         bool empty() const;
         
         const std::map<std::string, Value*>& kv_map() const;
-        std::string json() const;
+        std::string json(PrintMode printMode = PrintMode::Pretty) const;
         std::string xml( unsigned format = JSONx, const std::string &header = std::string(), const std::string &attrib = std::string() ) const;
         std::string write( unsigned format ) const;
         
@@ -184,7 +189,7 @@ namespace jsonxx {
         const std::vector<Value*>& values() const {
             return values_;
         }
-        std::string json() const;
+        std::string json(PrintMode printMode = PrintMode::Pretty) const;
         std::string xml( unsigned format = JSONx, const std::string &header = std::string(), const std::string &attrib = std::string() ) const;
         
         std::string write( unsigned format ) const { return format == JSON ? json() : xml(format); }
