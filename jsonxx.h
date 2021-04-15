@@ -139,7 +139,7 @@ namespace jsonxx {
         bool empty() const;
         
         const std::map<std::string, Value*>& kv_map() const;
-        std::string json(PrintMode printMode = PrintMode::Pretty) const;
+        std::string json(PrintMode printMode = PrintMode::Compact) const;
         std::string xml( unsigned format = JSONx, const std::string &header = std::string(), const std::string &attrib = std::string() ) const;
         std::string write( unsigned format ) const;
         
