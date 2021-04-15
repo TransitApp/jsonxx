@@ -604,8 +604,8 @@ namespace json {
         if( size > 2 ) {
             if( input[ size - 2 ] == ',' )
                 input[ size - 2 ] = ' ';
-            if( input[ size - 1 ] == ',' )
-                input[ size - 1 ] = ' ';
+            if( input[ size - 1 ] == ',' ) // compact case
+                input.resize(size - 1);
         }
         return input;
     }
@@ -614,18 +614,20 @@ namespace json {
         std::stringstream ss;
         std::string tab(depth, '\t');
         std::string newLine("\n");
+        std::string space(" ");
 
         switch (printMode) {
             case Compact:
                 tab = "";
                 newLine = "";
+                space = "";
                 break;
             case Pretty:
                 break;
         }
 
         if( !name.empty() )
-            ss << tab << '\"' << escape_string( name ) << '\"' << ':' << ' ';
+            ss << tab << '\"' << escape_string( name ) << '\"' << ':' << space;
         else
             ss << tab;
 
