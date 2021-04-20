@@ -189,7 +189,7 @@ namespace jsonxx {
         const std::vector<Value*>& values() const {
             return values_;
         }
-        std::string json(PrintMode printMode = PrintMode::Pretty) const;
+        std::string json(PrintMode printMode = PrintMode::Compact) const;
         std::string xml( unsigned format = JSONx, const std::string &header = std::string(), const std::string &attrib = std::string() ) const;
         
         std::string write( unsigned format ) const { return format == JSON ? json() : xml(format); }
