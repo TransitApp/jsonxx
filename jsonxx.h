@@ -353,8 +353,34 @@ number_value_ = static_cast<long double>(n); \
         }
         Value(const Value &other);
 
-        template<typename T, typename = typename std::enable_if<std::is_same<decltype(&Value::import<T>), void>::value>::type>
+#ifdef JSONXX_ALLOW_INVALID_TYPES
+        template<typename T>
         Value( const T&t ) : type_(INVALID_) { import(t); }
+#else
+#define $Value(TYPE) Value( const TYPE &t ) : type_(INVALID_) { import(t); }
+        $Value( bool )
+        $Value( char )
+        $Value( int )
+        $Value( long )
+        $Value( long long )
+        $Value( unsigned char )
+        $Value( unsigned int )
+        $Value( unsigned long )
+        $Value( unsigned long long )
+        $Value( float )
+        $Value( double )
+        $Value( long double )
+#if JSONXX_COMPILER_HAS_CXX11 > 0
+        $Value( std::nullptr_t )
+#endif
+        $Value( Null )
+        $Value( String )
+        $Value( std::string_view )
+        template<typename T> $Value( std::vector<T> )
+        $Value( Array )
+        $Value( Object )
+#undef $Value
+#endif
 
         template<size_t N>
         Value( const char (&t)[N] ) : type_(INVALID_) { import( std::string(t) ); }
