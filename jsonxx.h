@@ -352,8 +352,10 @@ number_value_ = static_cast<long double>(n); \
             return *this;
         }
         Value(const Value &other);
-        template<typename T>
+
+        template<typename T, typename = typename std::enable_if<std::is_same<decltype(&Value::import<T>), void>::value>::type>
         Value( const T&t ) : type_(INVALID_) { import(t); }
+
         template<size_t N>
         Value( const char (&t)[N] ) : type_(INVALID_) { import( std::string(t) ); }
         
