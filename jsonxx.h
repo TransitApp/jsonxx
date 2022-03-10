@@ -353,11 +353,11 @@ number_value_ = static_cast<long double>(n); \
         }
         Value(const Value &other);
 
-#ifdef JSONXX_ALLOW_INVALID_TYPES
-        template<typename T>
-        Value( const T&t ) : type_(INVALID_) { import(t); }
-#else
 #define $Value(TYPE) Value( const TYPE &t ) : type_(INVALID_) { import(t); }
+
+#ifdef JSONXX_ALLOW_INVALID_TYPES
+        template<typename T> $Value( T )
+#else
         $Value( bool )
         $Value( char )
         $Value( int )
@@ -379,8 +379,9 @@ number_value_ = static_cast<long double>(n); \
         template<typename T> $Value( std::vector<T> )
         $Value( Array )
         $Value( Object )
-#undef $Value
 #endif
+
+#undef $Value
 
         template<size_t N>
         Value( const char (&t)[N] ) : type_(INVALID_) { import( std::string(t) ); }
